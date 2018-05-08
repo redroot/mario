@@ -1,14 +1,16 @@
 module Main exposing (..)
 
 import Svg exposing (..)
-import Svg.Attributes exposing (..)
+import Svg.Attributes exposing (fill, viewBox)
 import Html exposing (Html)
+import Html.Attributes exposing (id, width, height, src, type_)
 import AnimationFrame
 import Keyboard exposing (KeyCode)
 import Models.Mario as Mario
 import Models.Keys as Keys
 import Models.Mario exposing (Direction(..))
 import Messages exposing (Msg(..))
+import External
 
 
 ---- MODEL ----
@@ -70,24 +72,42 @@ update msg model =
                         toString keyCode
                     else
                         "N/A"
+
+                nextCmd =
+                  case keyCode of
+                    90 ->
+                      External.sendPlaySound "jump"
+                    _ ->
+                      Cmd.none
             in
-                ( { model | keys = { updatedKeys | keyPressed = keyPressed } }, Cmd.none )
+                ( { model | keys = { updatedKeys | keyPressed = keyPressed } }, nextCmd )
 
 
 
 ---- VIEW ----
 
 
+
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ svg
-            [ width "100%"
-            , height "100%"
+        [
+          svg
+            [ Svg.Attributes.width "100%"
+            , Svg.Attributes.height "100%"
             , viewBox "0 0 256 208"
             ]
-            [ rect [ width "100%", height "100%", fill "black" ] []
+            [ rect
+                [ Svg.Attributes.width "100%"
+                , Svg.Attributes.height "100%"
+                , fill "black" ] []
             , Mario.draw model.mario model.charactersPath
+            ]
+          , Html.audio [ id "sound-jump"]
+            [
+              Html.source
+                [ src "sounds/sound-jump.mp3"
+                , type_ "audio/mp3"] []
             ]
         ]
 
